@@ -10,7 +10,7 @@ namespace Orleans.StorageProvider.Arango.TestGrains
         Task<Tuple<string, int, DateTime, Guid, IGrain1>> Get();
     }
 
-    public class MyState : GrainState
+    public class MyState 
     {
         public string StringValue { get; set; }
         public int IntValue { get; set; }

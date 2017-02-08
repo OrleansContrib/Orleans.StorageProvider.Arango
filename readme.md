@@ -1,4 +1,4 @@
-# Arango Storage Provider for Microsoft Orleans
+# ArangoDB Storage Provider for Microsoft Orleans
 
 Can be used to store grain state in an [ArangoDB](https://www.arangodb.com/) database.
 
@@ -21,20 +21,20 @@ Then from your grain code configure grain storage in the normal way:
 
 ```c#
 // define a state interface
-public interface IMyGrainState : IGrainState
+public class MyGrainState
 {
         string Value { get; set; }
 }
 
-// Select the BlobStore as the storage provider for the grain
-[StorageProvider(ProviderName="BlobStore")]
-public class Grain1 : Orleans.Grain<IMyGrainState>, IGrain1
+// Select the ARANGO as the storage provider for the grain
+[StorageProvider(ProviderName="ARANGO")]
+public class Grain1 : Orleans.Grain<MyGrainState>, IGrain1
 {
         public Task Test(string value)
         {
             // set the state and save it
                 this.State.Value = value;
-                return this.State.WriteStateAsync();
+                return this.WriteStateAsync();
         }
 
 }
