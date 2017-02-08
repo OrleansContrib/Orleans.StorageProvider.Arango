@@ -21,6 +21,7 @@ namespace Orleans.StorageProvider.Arango.Tests
             var now = DateTime.UtcNow;
             var guid = Guid.NewGuid();
             await grain.Set("string value", 12345, now, guid, GrainClient.GrainFactory.GetGrain<IGrain1>(2222));
+
             var result = await grain.Get();
             Assert.AreEqual("string value", result.Item1);
             Assert.AreEqual(12345, result.Item2);

@@ -14,8 +14,6 @@ namespace Orleans.StorageProvider.Arango
 {
     public class ArangoStorageProvider : IStorageProvider
     {
-        private string collectionName;
-
         public ArangoDatabase Database { get; private set; }
         public Logger Log { get; private set; }
         public string Name { get; private set; }
@@ -33,12 +31,12 @@ namespace Orleans.StorageProvider.Arango
 
             var databaseName = config.GetProperty("DatabaseName", "Orleans");
             var url = config.GetProperty("Url", "http://localhost:8529");
-            var username = config.GetProperty("username", "root");
-            var password = config.GetProperty("username", "password");
+            var username = config.GetProperty("Username", "root");
+            var password = config.GetProperty("Password", "password");
             var waitForSync = config.GetBoolProperty("WaitForSync", true);
 
             // the arango DB driver assumes that tables are names after the entity types
-            collectionName = nameof(GrainState); 
+            var collectionName = nameof(GrainState); 
 
             ArangoDatabase.ChangeSetting(s =>
             {
@@ -67,7 +65,7 @@ namespace Orleans.StorageProvider.Arango
             {
                 var primaryKey = grainReference.ToKeyString();
 
-                var result = await this.Database.DocumentAsync<GrainState>($"{this.collectionName}/{primaryKey}").ConfigureAwait(false);
+                var result = await this.Database.DocumentAsync<GrainState>(primaryKey).ConfigureAwait(false);
                 if (null == result)
                 {
                     return;
@@ -90,7 +88,7 @@ namespace Orleans.StorageProvider.Arango
 
                 var document = new GrainState
                 {
-                    Id = $"{this.collectionName}/{primaryKey}",
+                    Id = primaryKey,
                     Revision = grainState.ETag,
                     State = grainState.State
                 };
@@ -119,7 +117,7 @@ namespace Orleans.StorageProvider.Arango
             {
                 var primaryKey = grainReference.ToKeyString();
 
-                await this.Database.RemoveByIdAsync<GrainState>($"{this.collectionName}/{primaryKey}").ConfigureAwait(false);
+                await this.Database.RemoveByIdAsync<GrainState>(primaryKey).ConfigureAwait(false);
 
                 grainState.ETag = null;
             }

@@ -9,7 +9,7 @@ namespace Orleans.StorageProvider.Arango
         [DocumentProperty(Identifier = IdentifierType.Revision)]
         public string Revision { get; set; }
 
-        [DocumentProperty(Identifier = IdentifierType.Handle)]
+        [DocumentProperty(Identifier = IdentifierType.Key)]
         public string Id { get; set; }
 
         public object State { get; set; }

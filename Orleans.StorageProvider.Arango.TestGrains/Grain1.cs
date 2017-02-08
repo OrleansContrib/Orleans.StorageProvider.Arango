@@ -34,6 +34,8 @@ namespace Orleans.StorageProvider.Arango.TestGrains
 
         public Task<Tuple<string, int, DateTime, Guid, IGrain1>> Get()
         {
+            this.ReadStateAsync();
+
             return Task.FromResult(new Tuple<string, int, DateTime, Guid, IGrain1>(
               State.StringValue,
               State.IntValue,
