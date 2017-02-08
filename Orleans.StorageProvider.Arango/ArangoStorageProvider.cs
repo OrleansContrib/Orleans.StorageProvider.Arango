@@ -9,6 +9,7 @@ using Orleans.Runtime;
 using ArangoDB.Client;
 using System.Net;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Orleans.StorageProvider.Arango
 {
@@ -70,7 +71,15 @@ namespace Orleans.StorageProvider.Arango
                 {
                     return;
                 }
-                grainState.State = result.State;
+
+                if (result.State != null)
+                {
+                    grainState.State = (result.State as JObject).ToObject(grainState.State.GetType());
+                }
+                else
+                {
+                    grainState.State = null;
+                }
                 grainState.ETag = result.Revision;
             }
             catch (Exception ex)

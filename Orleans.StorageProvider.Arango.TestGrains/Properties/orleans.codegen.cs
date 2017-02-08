@@ -53,7 +53,7 @@ namespace Orleans.StorageProvider.Arango.TestGrains
                 case -1233062554:
                     switch (@methodId)
                     {
-                        case -394250501:
+                        case -1629480600:
                             return "Set";
                         case -940922787:
                             return "Get";
@@ -66,14 +66,14 @@ namespace Orleans.StorageProvider.Arango.TestGrains
             }
         }
 
-        public global::System.Threading.Tasks.Task @Set(global::System.String @stringValue, global::System.Int32 @intValue, global::System.DateTime @dateTimeValue, global::System.Guid @guidValue, global::Orleans.StorageProvider.Arango.TestGrains.IGrain1 @grainValue)
+        public global::System.Threading.Tasks.Task @Set(global::System.String @stringValue, global::System.Int32 @intValue, global::System.DateTime @dateTimeValue, global::System.Guid @guidValue)
         {
-            return base.@InvokeMethodAsync<global::System.Object>(-394250501, new global::System.Object[]{@stringValue, @intValue, @dateTimeValue, @guidValue, @grainValue is global::Orleans.Grain ? @grainValue.@AsReference<global::Orleans.StorageProvider.Arango.TestGrains.IGrain1>() : @grainValue});
+            return base.@InvokeMethodAsync<global::System.Object>(-1629480600, new global::System.Object[]{@stringValue, @intValue, @dateTimeValue, @guidValue});
         }
 
-        public global::System.Threading.Tasks.Task<global::System.Tuple<global::System.String, global::System.Int32, global::System.DateTime, global::System.Guid, global::Orleans.StorageProvider.Arango.TestGrains.IGrain1>> @Get()
+        public global::System.Threading.Tasks.Task<global::System.Tuple<global::System.String, global::System.Int32, global::System.DateTime, global::System.Guid>> @Get()
         {
-            return base.@InvokeMethodAsync<global::System.Tuple<global::System.String, global::System.Int32, global::System.DateTime, global::System.Guid, global::Orleans.StorageProvider.Arango.TestGrains.IGrain1>>(-940922787, null);
+            return base.@InvokeMethodAsync<global::System.Tuple<global::System.String, global::System.Int32, global::System.DateTime, global::System.Guid>>(-940922787, null);
         }
     }
 
@@ -92,8 +92,8 @@ namespace Orleans.StorageProvider.Arango.TestGrains
                 case -1233062554:
                     switch (methodId)
                     {
-                        case -394250501:
-                            return ((global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)@grain).@Set((global::System.String)arguments[0], (global::System.Int32)arguments[1], (global::System.DateTime)arguments[2], (global::System.Guid)arguments[3], (global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)arguments[4]).@Box();
+                        case -1629480600:
+                            return ((global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)@grain).@Set((global::System.String)arguments[0], (global::System.Int32)arguments[1], (global::System.DateTime)arguments[2], (global::System.Guid)arguments[3]).@Box();
                         case -940922787:
                             return ((global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)@grain).@Get().@Box();
                         default:
@@ -124,7 +124,6 @@ namespace Orleans.StorageProvider.Arango.TestGrains
             global::Orleans.StorageProvider.Arango.TestGrains.MyState result = new global::Orleans.StorageProvider.Arango.TestGrains.MyState();
             global::Orleans.@Serialization.@SerializationContext.@Current.@RecordObject(original, result);
             result.@DateTimeValue = input.@DateTimeValue;
-            result.@GrainValue = (global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)global::Orleans.Serialization.SerializationManager.@DeepCopyInner(input.@GrainValue);
             result.@GuidValue = (global::System.Guid)global::Orleans.Serialization.SerializationManager.@DeepCopyInner(input.@GuidValue);
             result.@IntValue = input.@IntValue;
             result.@StringValue = input.@StringValue;
@@ -136,7 +135,6 @@ namespace Orleans.StorageProvider.Arango.TestGrains
         {
             global::Orleans.StorageProvider.Arango.TestGrains.MyState input = (global::Orleans.StorageProvider.Arango.TestGrains.MyState)untypedInput;
             global::Orleans.Serialization.SerializationManager.@SerializeInner(input.@DateTimeValue, stream, typeof (global::System.DateTime));
-            global::Orleans.Serialization.SerializationManager.@SerializeInner(input.@GrainValue, stream, typeof (global::Orleans.StorageProvider.Arango.TestGrains.IGrain1));
             global::Orleans.Serialization.SerializationManager.@SerializeInner(input.@GuidValue, stream, typeof (global::System.Guid));
             global::Orleans.Serialization.SerializationManager.@SerializeInner(input.@IntValue, stream, typeof (global::System.Int32));
             global::Orleans.Serialization.SerializationManager.@SerializeInner(input.@StringValue, stream, typeof (global::System.String));
@@ -148,7 +146,6 @@ namespace Orleans.StorageProvider.Arango.TestGrains
             global::Orleans.StorageProvider.Arango.TestGrains.MyState result = new global::Orleans.StorageProvider.Arango.TestGrains.MyState();
             global::Orleans.@Serialization.@DeserializationContext.@Current.@RecordObject(result);
             result.@DateTimeValue = (global::System.DateTime)global::Orleans.Serialization.SerializationManager.@DeserializeInner(typeof (global::System.DateTime), stream);
-            result.@GrainValue = (global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)global::Orleans.Serialization.SerializationManager.@DeserializeInner(typeof (global::Orleans.StorageProvider.Arango.TestGrains.IGrain1), stream);
             result.@GuidValue = (global::System.Guid)global::Orleans.Serialization.SerializationManager.@DeserializeInner(typeof (global::System.Guid), stream);
             result.@IntValue = (global::System.Int32)global::Orleans.Serialization.SerializationManager.@DeserializeInner(typeof (global::System.Int32), stream);
             result.@StringValue = (global::System.String)global::Orleans.Serialization.SerializationManager.@DeserializeInner(typeof (global::System.String), stream);

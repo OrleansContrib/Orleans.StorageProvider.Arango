@@ -20,14 +20,13 @@ namespace Orleans.StorageProvider.Arango.Tests
             var grain = GrainClient.GrainFactory.GetGrain<IGrain1>(1234);
             var now = DateTime.UtcNow;
             var guid = Guid.NewGuid();
-            await grain.Set("string value", 12345, now, guid, GrainClient.GrainFactory.GetGrain<IGrain1>(2222));
+            await grain.Set("string value", 12345, now, guid);
 
             var result = await grain.Get();
             Assert.AreEqual("string value", result.Item1);
             Assert.AreEqual(12345, result.Item2);
             Assert.AreEqual(now, result.Item3);
             Assert.AreEqual(guid, result.Item4);
-            Assert.AreEqual(2222, result.Item5.GetPrimaryKeyLong());
         }
 
 
@@ -39,7 +38,7 @@ namespace Orleans.StorageProvider.Arango.Tests
         private static void InitSilo(string[] args)
         {
             var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.Globals.RegisterArangoStorageProvider("ARANGO", password:"password");
+            config.Globals.RegisterArangoStorageProvider("ARANGO", password:"e3orange");
             siloHost = new SiloHost("Primary", config );
 
             siloHost.InitializeOrleansSilo();
