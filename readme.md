@@ -26,13 +26,13 @@ public class MyGrainState
         string Value { get; set; }
 }
 
-// Select the ARANGO as the storage provider for the grain
+// Select ARANGO as the storage provider for the grain
 [StorageProvider(ProviderName="ARANGO")]
 public class Grain1 : Orleans.Grain<MyGrainState>, IGrain1
 {
         public Task Test(string value)
         {
-            // set the state and save it
+                // set the state and save it
                 this.State.Value = value;
                 return this.WriteStateAsync();
         }
