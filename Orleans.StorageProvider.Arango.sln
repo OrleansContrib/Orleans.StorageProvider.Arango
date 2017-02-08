@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.StorageProvider.Arango", "Orleans.StorageProvider.Arango\Orleans.StorageProvider.Arango.csproj", "{797DD764-6BD3-4C52-B9BC-9F21D822E321}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.StorageProvider.Arango.TestGrains", "Orleans.StorageProvider.Arango.TestGrains\Orleans.StorageProvider.Arango.TestGrains.csproj", "{DAACC4D9-8A8F-4444-8F78-6C5E36BADD18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orleans.StorageProvider.Arango.Tests", "Orleans.StorageProvider.Arango.Tests\Orleans.StorageProvider.Arango.Tests.csproj", "{714EA1D6-16C9-41DE-8E00-4CA5AE0D191C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{797DD764-6BD3-4C52-B9BC-9F21D822E321}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{797DD764-6BD3-4C52-B9BC-9F21D822E321}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{797DD764-6BD3-4C52-B9BC-9F21D822E321}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{797DD764-6BD3-4C52-B9BC-9F21D822E321}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAACC4D9-8A8F-4444-8F78-6C5E36BADD18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAACC4D9-8A8F-4444-8F78-6C5E36BADD18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAACC4D9-8A8F-4444-8F78-6C5E36BADD18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAACC4D9-8A8F-4444-8F78-6C5E36BADD18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{714EA1D6-16C9-41DE-8E00-4CA5AE0D191C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{714EA1D6-16C9-41DE-8E00-4CA5AE0D191C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{714EA1D6-16C9-41DE-8E00-4CA5AE0D191C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{714EA1D6-16C9-41DE-8E00-4CA5AE0D191C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
