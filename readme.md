@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/c6025rmq05xbegvp/branch/master?svg=true)](https://ci.appveyor.com/project/OrleansContrib/orleans-storageprovider-arango/branch/master)
+
 # ArangoDB Storage Provider for Microsoft Orleans
 
 Can be used to store grain state in an [ArangoDB](https://www.arangodb.com/) database.
