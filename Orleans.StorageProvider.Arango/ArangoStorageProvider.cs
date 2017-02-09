@@ -109,7 +109,7 @@ namespace Orleans.StorageProvider.Arango
                 }
                 else
                 {
-                    var result = await this.Database.UpdateAsync<GrainState>(document).ConfigureAwait(false);
+                    var result = await this.Database.UpdateByIdAsync<GrainState>(primaryKey, document).ConfigureAwait(false);
                     grainState.ETag = result.Rev;
                 }
             }

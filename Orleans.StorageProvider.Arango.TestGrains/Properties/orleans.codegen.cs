@@ -57,6 +57,8 @@ namespace Orleans.StorageProvider.Arango.TestGrains
                             return "Set";
                         case -940922787:
                             return "Get";
+                        case -1730113398:
+                            return "Clear";
                         default:
                             throw new global::System.NotImplementedException("interfaceId=" + -1233062554 + ",methodId=" + @methodId);
                     }
@@ -74,6 +76,11 @@ namespace Orleans.StorageProvider.Arango.TestGrains
         public global::System.Threading.Tasks.Task<global::System.Tuple<global::System.String, global::System.Int32, global::System.DateTime, global::System.Guid>> @Get()
         {
             return base.@InvokeMethodAsync<global::System.Tuple<global::System.String, global::System.Int32, global::System.DateTime, global::System.Guid>>(-940922787, null);
+        }
+
+        public global::System.Threading.Tasks.Task @Clear()
+        {
+            return base.@InvokeMethodAsync<global::System.Object>(-1730113398, null);
         }
     }
 
@@ -96,6 +103,8 @@ namespace Orleans.StorageProvider.Arango.TestGrains
                             return ((global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)@grain).@Set((global::System.String)arguments[0], (global::System.Int32)arguments[1], (global::System.DateTime)arguments[2], (global::System.Guid)arguments[3]).@Box();
                         case -940922787:
                             return ((global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)@grain).@Get().@Box();
+                        case -1730113398:
+                            return ((global::Orleans.StorageProvider.Arango.TestGrains.IGrain1)@grain).@Clear().@Box();
                         default:
                             throw new global::System.NotImplementedException("interfaceId=" + -1233062554 + ",methodId=" + methodId);
                     }

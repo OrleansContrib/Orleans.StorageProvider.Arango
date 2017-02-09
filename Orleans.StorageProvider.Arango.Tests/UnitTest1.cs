@@ -27,6 +27,9 @@ namespace Orleans.StorageProvider.Arango.Tests
             Assert.AreEqual(12345, result.Item2);
             Assert.AreEqual(now, result.Item3);
             Assert.AreEqual(guid, result.Item4);
+
+            await grain.Clear();
+
         }
 
 
