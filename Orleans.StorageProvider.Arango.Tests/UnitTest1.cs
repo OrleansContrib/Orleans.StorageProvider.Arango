@@ -41,7 +41,7 @@ namespace Orleans.StorageProvider.Arango.Tests
         private static void InitSilo(string[] args)
         {
             var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.Globals.RegisterArangoStorageProvider("ARANGO", password:"e3orange");
+            config.Globals.RegisterArangoStorageProvider("ARANGO", password:"password");
             siloHost = new SiloHost("Primary", config );
 
             siloHost.InitializeOrleansSilo();
