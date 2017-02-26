@@ -18,6 +18,9 @@ namespace Orleans.StorageProvider.Arango
         public ArangoDatabase Database { get; private set; }
         public Logger Log { get; private set; }
         public string Name { get; private set; }
+        private List<ArangoDB.Client.Data.CreateCollectionResult> collectionsList;
+        private bool waitForSync;
+        private JsonSerializerSettings settings;
 
         public Task Close()
         {
@@ -34,10 +37,9 @@ namespace Orleans.StorageProvider.Arango
             var url = config.GetProperty("Url", "http://localhost:8529");
             var username = config.GetProperty("Username", "root");
             var password = config.GetProperty("Password", "password");
-            var waitForSync = config.GetBoolProperty("WaitForSync", true);
-
-            // the arango DB driver assumes that tables are names after the entity types
-            var collectionName = nameof(GrainState); 
+            waitForSync = config.GetBoolProperty("WaitForSync", true);
+            settings = Orleans.Serialization.OrleansJsonSerializer.GetDefaultSerializerSettings();
+            settings.DefaultValueHandling = DefaultValueHandling.Include;
 
             ArangoDatabase.ChangeSetting(s =>
             {
@@ -49,10 +51,19 @@ namespace Orleans.StorageProvider.Arango
             });
 
             this.Database = new ArangoDatabase();
+            collectionsList = await this.Database.ListCollectionsAsync();
+        }
 
+        private async Task CreateCollectionIfNeeded(bool waitForSync, string collectionName)
+        {
             try
             {
-                await this.Database.CreateCollectionAsync(collectionName);
+
+                if (!collectionsList.Any(x => x.Name == collectionName))
+                {
+                    var addedCollection = await this.Database.CreateCollectionAsync(collectionName, waitForSync: waitForSync);
+                    collectionsList.Add(addedCollection);
+                }
             }
             catch (Exception ex)
             {
@@ -64,9 +75,16 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
+                string collectionName = grainType.Replace(".", "-");
+                await CreateCollectionIfNeeded(this.waitForSync, collectionName);
                 var primaryKey = grainReference.ToKeyString();
+                primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+", ":");
+                if (Log.IsVerbose)
+                    Log.Info("reading {0}", primaryKey);
 
-                var result = await this.Database.DocumentAsync<GrainState>(primaryKey).ConfigureAwait(false);
+
+                var result = await this.Database.Collection(collectionName).DocumentAsync<GrainState>(primaryKey).ConfigureAwait(false);
+                Log.Info("is it null {0}", result == null);
                 if (null == result)
                 {
                     return;
@@ -74,12 +92,13 @@ namespace Orleans.StorageProvider.Arango
 
                 if (result.State != null)
                 {
-                    grainState.State = (result.State as JObject).ToObject(grainState.State.GetType());
+                    grainState.State = JsonConvert.DeserializeObject((result.State as string), grainState.State.GetType(), settings);
                 }
                 else
                 {
                     grainState.State = null;
                 }
+                Log.Info("Reading result {0} eTag:{1}", result.Id, result.Revision);
                 grainState.ETag = result.Revision;
             }
             catch (Exception ex)
@@ -93,23 +112,26 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
+                string collectionName = grainType.Replace(".", "-");
                 var primaryKey = grainReference.ToKeyString();
-
+                primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+", ":");
                 var document = new GrainState
                 {
                     Id = primaryKey,
                     Revision = grainState.ETag,
-                    State = grainState.State
+                    State = JsonConvert.SerializeObject(grainState.State, grainState.State.GetType(), settings)
                 };
-
+                if (Log.IsVerbose)
+                    Log.Info("writing {0} with type {1} and eTag {2}", primaryKey, grainType, grainState.ETag);
+                await CreateCollectionIfNeeded(this.waitForSync, collectionName);
                 if (string.IsNullOrWhiteSpace(grainState.ETag))
                 {
-                    var result = await this.Database.InsertAsync<GrainState>(document).ConfigureAwait(false);
+                    var result = await this.Database.Collection(collectionName).InsertAsync(document).ConfigureAwait(false);
                     grainState.ETag = result.Rev;
                 }
                 else
                 {
-                    var result = await this.Database.UpdateByIdAsync<GrainState>(primaryKey, document).ConfigureAwait(false);
+                    var result = await this.Database.Collection(collectionName).UpdateByIdAsync(primaryKey, document).ConfigureAwait(false);
                     grainState.ETag = result.Rev;
                 }
             }
@@ -124,10 +146,11 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
+                string collectionName = grainType.Replace(".", "-");
+                await CreateCollectionIfNeeded(this.waitForSync, collectionName);
                 var primaryKey = grainReference.ToKeyString();
-
-                await this.Database.RemoveByIdAsync<GrainState>(primaryKey).ConfigureAwait(false);
-
+                primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+", ":");
+                await this.Database.Collection(collectionName).RemoveByIdAsync(primaryKey).ConfigureAwait(false);
                 grainState.ETag = null;
             }
             catch (Exception ex)
