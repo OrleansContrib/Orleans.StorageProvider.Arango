@@ -21,6 +21,7 @@ namespace Orleans.StorageProvider.Arango
         private List<ArangoDB.Client.Data.CreateCollectionResult> collectionsList;
         private bool waitForSync;
         private JsonSerializerSettings settings;
+        private static bool isInitialized = false;
 
         public Task Close()
         {
@@ -40,16 +41,18 @@ namespace Orleans.StorageProvider.Arango
             waitForSync = config.GetBoolProperty("WaitForSync", true);
             settings = Orleans.Serialization.OrleansJsonSerializer.GetDefaultSerializerSettings();
             settings.DefaultValueHandling = DefaultValueHandling.Include;
-
-            ArangoDatabase.ChangeSetting(s =>
+            if (!isInitialized)
             {
-                s.Database = databaseName;
-                s.Url = url;
-                s.Credential = new NetworkCredential(username, password);
-                s.DisableChangeTracking = true;
-                s.WaitForSync = waitForSync;
-            });
-
+                ArangoDatabase.ChangeSetting(s =>
+                {
+                    s.Database = databaseName;
+                    s.Url = url;
+                    s.Credential = new NetworkCredential(username, password);
+                    s.DisableChangeTracking = true;
+                    s.WaitForSync = waitForSync;
+                });
+                isInitialized = true;
+            }
             this.Database = new ArangoDatabase();
             collectionsList = await this.Database.ListCollectionsAsync();
         }
@@ -107,16 +110,18 @@ namespace Orleans.StorageProvider.Arango
             }
         }
 
-        private static string ConvertGrainReferenceToDocumentKey(GrainReference grainReference)
+        private string ConvertGrainReferenceToDocumentKey(GrainReference grainReference)
         {
             var primaryKey = grainReference.ToKeyString();
-            primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+","_");
+            primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+", "_");
             return primaryKey;
         }
 
-        private static string ConvertGrainTypeToCollectionName(string grainType)
+        private string ConvertGrainTypeToCollectionName(string grainType)
         {
-            var index = grainType.IndexOf(".");
+            
+            var index = grainType.LastIndexOf(".");
+            
             string collectionName;
             if (index < 0)
                 collectionName = grainType;
@@ -130,6 +135,7 @@ namespace Orleans.StorageProvider.Arango
             try
             {
                 string collectionName = ConvertGrainTypeToCollectionName(grainType);
+                await CreateCollectionIfNeeded(this.waitForSync, collectionName);
                 string primaryKey = ConvertGrainReferenceToDocumentKey(grainReference);
                 var document = new GrainState
                 {
@@ -139,7 +145,7 @@ namespace Orleans.StorageProvider.Arango
                 };
                 if (Log.IsVerbose)
                     Log.Info("writing {0} with type {1} and eTag {2}", primaryKey, grainType, grainState.ETag);
-                await CreateCollectionIfNeeded(this.waitForSync, collectionName);
+
                 if (string.IsNullOrWhiteSpace(grainState.ETag))
                 {
                     var result = await this.Database.Collection(collectionName).InsertAsync(document).ConfigureAwait(false);
