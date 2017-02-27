@@ -12,6 +12,6 @@ namespace Orleans.StorageProvider.Arango
         [DocumentProperty(Identifier = IdentifierType.Key)]
         public string Id { get; set; }
 
-        public string State { get; set; }
+        public object State { get; set; }
     }
 }

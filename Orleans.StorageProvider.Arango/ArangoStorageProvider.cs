@@ -75,10 +75,9 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
-                string collectionName = grainType.Replace(".", "-");
+                string collectionName = ConvertGrainTypeToCollectionName(grainType);
                 await CreateCollectionIfNeeded(this.waitForSync, collectionName);
-                var primaryKey = grainReference.ToKeyString();
-                primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+", ":");
+                string primaryKey = ConvertGrainReferenceToDocumentKey(grainReference);
                 if (Log.IsVerbose)
                     Log.Info("reading {0}", primaryKey);
 
@@ -108,13 +107,30 @@ namespace Orleans.StorageProvider.Arango
             }
         }
 
+        private static string ConvertGrainReferenceToDocumentKey(GrainReference grainReference)
+        {
+            var primaryKey = grainReference.ToKeyString();
+            primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+","_");
+            return primaryKey;
+        }
+
+        private static string ConvertGrainTypeToCollectionName(string grainType)
+        {
+            var index = grainType.IndexOf(".");
+            string collectionName;
+            if (index < 0)
+                collectionName = grainType;
+            else
+                collectionName = grainType.Substring(index + 1, grainType.Length - (index + 1));
+            return collectionName;
+        }
+
         public async Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
             try
             {
-                string collectionName = grainType.Replace(".", "-");
-                var primaryKey = grainReference.ToKeyString();
-                primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+", ":");
+                string collectionName = ConvertGrainTypeToCollectionName(grainType);
+                string primaryKey = ConvertGrainReferenceToDocumentKey(grainReference);
                 var document = new GrainState
                 {
                     Id = primaryKey,
@@ -146,10 +162,10 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
-                string collectionName = grainType.Replace(".", "-");
+                string collectionName = ConvertGrainTypeToCollectionName(grainType);
                 await CreateCollectionIfNeeded(this.waitForSync, collectionName);
-                var primaryKey = grainReference.ToKeyString();
-                primaryKey = primaryKey.Replace("GrainReference=", "GR:").Replace("+", ":");
+                string primaryKey = ConvertGrainReferenceToDocumentKey(grainReference);
+
                 await this.Database.Collection(collectionName).RemoveByIdAsync(primaryKey).ConfigureAwait(false);
                 grainState.ETag = null;
             }
