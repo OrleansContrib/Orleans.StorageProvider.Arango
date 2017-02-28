@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Orleans.StorageProvider.Arango.TestGrains
 {
-    public interface IGrain1 : IGrainWithIntegerKey
+    public interface IGrain1 : IGrainWithStringKey
     {
         Task Set(string stringValue, int intValue, DateTime dateTimeValue, Guid guidValue);
         Task<Tuple<string, int, DateTime, Guid>> Get();

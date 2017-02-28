@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Orleans.Runtime;
+using System.Text.RegularExpressions;
 
 namespace Orleans.StorageProvider.Arango
 {
@@ -27,6 +29,18 @@ namespace Orleans.StorageProvider.Arango
             properties.Add("WaitForSync", waitForSync.ToString());
 
             globalConfig.RegisterStorageProvider<ArangoStorageProvider>(name, properties);
+
+        }
+
+    }
+
+    internal static class PrivateExtensions
+    {
+        static Regex documentKeyRegex = new Regex(@"[^a-zA-Z0-9_/-:.@(),=;$!*'%]");
+
+        public static string ToArangoKeyString(this GrainReference grainRef)
+        {
+            return documentKeyRegex.Replace(grainRef.ToKeyString(), "_");
 
         }
     }

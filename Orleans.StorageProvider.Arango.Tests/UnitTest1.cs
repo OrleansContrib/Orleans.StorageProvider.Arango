@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using Orleans.Runtime.Configuration;
 using System.Collections.Generic;
+using Orleans.Runtime;
 
 namespace Orleans.StorageProvider.Arango.Tests
 {
@@ -17,9 +18,10 @@ namespace Orleans.StorageProvider.Arango.Tests
         public async Task TestGrains()
         {
             // insert your grain test code here
-            var grain = GrainClient.GrainFactory.GetGrain<IGrain1>(1234);
+            var grain = GrainClient.GrainFactory.GetGrain<IGrain1>("1234");
             var now = DateTime.UtcNow;
             var guid = Guid.NewGuid();
+            await grain.Set("string value", 12344, now, guid);
             await grain.Set("string value", 12345, now, guid);
 
             var result = await grain.Get();
@@ -29,7 +31,14 @@ namespace Orleans.StorageProvider.Arango.Tests
             Assert.AreEqual(guid, result.Item4);
 
             await grain.Clear();
+        }
 
+        [TestMethod]
+        public async Task TestKeys()
+        {
+            var grainRef = GrainReference.FromKeyString(@"GrainReference=000000000000000000000000000000000600000040155719+This£is#a#bad document~key!");
+            var key = grainRef.ToArangoKeyString();
+            Assert.AreEqual("GrainReference=000000000000000000000000000000000600000040155719_This_is_a_bad_document_key!", key);
         }
 
 
@@ -41,7 +50,7 @@ namespace Orleans.StorageProvider.Arango.Tests
         private static void InitSilo(string[] args)
         {
             var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.Globals.RegisterArangoStorageProvider("ARANGO", password:"password");
+            config.Globals.RegisterArangoStorageProvider("ARANGO", password:"e3orange");
             siloHost = new SiloHost("Primary", config );
 
             siloHost.InitializeOrleansSilo();

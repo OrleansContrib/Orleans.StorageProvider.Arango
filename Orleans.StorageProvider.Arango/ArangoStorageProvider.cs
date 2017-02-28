@@ -1,15 +1,12 @@
-﻿using Orleans.Storage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ArangoDB.Client;
+using Newtonsoft.Json.Linq;
 using Orleans.Providers;
 using Orleans.Runtime;
-using ArangoDB.Client;
-using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Orleans.Storage;
 
 namespace Orleans.StorageProvider.Arango
 {
@@ -64,7 +61,7 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
-                var primaryKey = grainReference.ToKeyString();
+                var primaryKey = grainReference.ToArangoKeyString();
 
                 var result = await this.Database.DocumentAsync<GrainState>(primaryKey).ConfigureAwait(false);
                 if (null == result)
@@ -93,7 +90,7 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
-                var primaryKey = grainReference.ToKeyString();
+                var primaryKey = grainReference.ToArangoKeyString();
 
                 var document = new GrainState
                 {
@@ -124,7 +121,7 @@ namespace Orleans.StorageProvider.Arango
         {
             try
             {
-                var primaryKey = grainReference.ToKeyString();
+                var primaryKey = grainReference.ToArangoKeyString();
 
                 await this.Database.RemoveByIdAsync<GrainState>(primaryKey).ConfigureAwait(false);
 
