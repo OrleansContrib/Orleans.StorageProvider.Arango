@@ -6,8 +6,8 @@ namespace Orleans.StorageProvider.Arango.TestGrains
 {
     public interface IGrain1 : IGrainWithStringKey
     {
-        Task Set(string stringValue, int intValue, DateTime dateTimeValue, Guid guidValue);
-        Task<Tuple<string, int, DateTime, Guid>> Get();
+        Task Set(string stringValue, int intValue, DateTime dateTimeValue, Guid guidValue, IGrain1 grainRef);
+        Task<Tuple<string, int, DateTime, Guid, IGrain1>> Get();
         Task Clear();
     }
 
@@ -17,19 +17,21 @@ namespace Orleans.StorageProvider.Arango.TestGrains
         public int IntValue { get; set; }
         public DateTime DateTimeValue { get; set; }
         public Guid GuidValue { get; set; }
+        public IGrain1 GrainRef { get; set; }
     }
 
     [StorageProvider(ProviderName = "ARANGO")]
     public class Grain1 : Grain<MyState>, IGrain1
     {
-        public Task Set(string stringValue, int intValue, DateTime dateTimeValue, Guid guidValue)
+        public Task Set(string stringValue, int intValue, DateTime dateTimeValue, Guid guidValue, IGrain1 grainRef)
         {
             try
             {
-                State.StringValue = stringValue;
-                State.IntValue = intValue;
-                State.DateTimeValue = dateTimeValue;
-                State.GuidValue = guidValue;
+                this.State.StringValue = stringValue;
+                this.State.IntValue = intValue;
+                this.State.DateTimeValue = dateTimeValue;
+                this.State.GuidValue = guidValue;
+                this.State.GrainRef = grainRef;
                 return WriteStateAsync();
             }
             catch (Exception ex)
@@ -41,17 +43,18 @@ namespace Orleans.StorageProvider.Arango.TestGrains
 
         }
 
-        public Task<Tuple<string, int, DateTime, Guid>> Get()
+        public Task<Tuple<string, int, DateTime, Guid, IGrain1>> Get()
         {
             try
             {
                 this.ReadStateAsync();
 
-                return Task.FromResult(new Tuple<string, int, DateTime, Guid>(
-                  State.StringValue,
-                  State.IntValue,
-                  State.DateTimeValue,
-                  State.GuidValue));
+                return Task.FromResult(new Tuple<string, int, DateTime, Guid, IGrain1>(
+                  this.State.StringValue,
+                  this.State.IntValue,
+                  this.State.DateTimeValue,
+                  this.State.GuidValue,
+                  this.State.GrainRef));
 
             }
             catch (Exception ex)

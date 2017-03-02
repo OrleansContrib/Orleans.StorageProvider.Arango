@@ -68,6 +68,7 @@
     <Compile Include="ArangoStorageException.cs" />
     <Compile Include="ArangoStorageProvider.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="GrainReferenceConverter.cs" />
     <Compile Include="GrainState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

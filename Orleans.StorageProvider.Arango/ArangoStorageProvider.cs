@@ -16,6 +16,9 @@ namespace Orleans.StorageProvider.Arango
         public Logger Log { get; private set; }
         public string Name { get; private set; }
 
+
+        static Newtonsoft.Json.JsonSerializer jsonSerializerSettings;
+
         public Task Close()
         {
             this.Database.Dispose();
@@ -32,9 +35,11 @@ namespace Orleans.StorageProvider.Arango
             var username = config.GetProperty("Username", "root");
             var password = config.GetProperty("Password", "password");
             var waitForSync = config.GetBoolProperty("WaitForSync", true);
-
+            
             // the arango DB driver assumes that tables are names after the entity types
-            var collectionName = nameof(GrainState); 
+            var collectionName = nameof(GrainState);
+
+            var grainRefConverter = new GrainReferenceConverter();
 
             ArangoDatabase.ChangeSetting(s =>
             {
@@ -43,7 +48,11 @@ namespace Orleans.StorageProvider.Arango
                 s.Credential = new NetworkCredential(username, password);
                 s.DisableChangeTracking = true;
                 s.WaitForSync = waitForSync;
+                s.Serialization.Converters.Add(grainRefConverter);
             });
+
+            jsonSerializerSettings = new Newtonsoft.Json.JsonSerializer();
+            jsonSerializerSettings.Converters.Add(grainRefConverter);
 
             this.Database = new ArangoDatabase();
 
@@ -62,7 +71,7 @@ namespace Orleans.StorageProvider.Arango
             try
             {
                 var primaryKey = grainReference.ToArangoKeyString();
-
+                
                 var result = await this.Database.DocumentAsync<GrainState>(primaryKey).ConfigureAwait(false);
                 if (null == result)
                 {
@@ -71,7 +80,7 @@ namespace Orleans.StorageProvider.Arango
 
                 if (result.State != null)
                 {
-                    grainState.State = (result.State as JObject).ToObject(grainState.State.GetType());
+                    grainState.State = (result.State as JObject).ToObject(grainState.State.GetType(), jsonSerializerSettings);
                 }
                 else
                 {
