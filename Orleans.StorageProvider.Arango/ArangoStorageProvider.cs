@@ -90,7 +90,7 @@ namespace Orleans.StorageProvider.Arango
             }
             catch (Exception ex)
             {
-                this.Log.Error(190000, "ArangoStorageProvider.ClearStateAsync()", ex);
+                this.Log.Error(190000, "ArangoStorageProvider.ReadStateAsync()", ex);
                 throw new ArangoStorageException(ex.ToString());
             }
         }
