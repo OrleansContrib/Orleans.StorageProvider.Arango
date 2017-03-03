@@ -18,7 +18,9 @@ namespace Orleans.StorageProvider.Arango
             string url = "http://localhost:8529",
             string username = "root",
             string password = "password",
-            bool waitForSync = true)
+            bool waitForSync = true,
+            string collectionName = null)
+
         {
             var properties = new Dictionary<string, string>();
 
@@ -27,6 +29,7 @@ namespace Orleans.StorageProvider.Arango
             properties.Add("Username", username);
             properties.Add("Password", password);
             properties.Add("WaitForSync", waitForSync.ToString());
+            properties.Add("CollectionName", collectionName);
 
             globalConfig.RegisterStorageProvider<ArangoStorageProvider>(name, properties);
 
@@ -42,6 +45,13 @@ namespace Orleans.StorageProvider.Arango
         {
             return documentKeyRegex.Replace(grainRef.ToKeyString(), "_");
 
+        }
+
+        static Regex collectionRegex = new Regex(@"[^a-zA-Z0-9_-]");
+
+        public static string ToArangoCollectionName(this string collectionName)
+        {
+            return documentKeyRegex.Replace(collectionName, "_");
         }
     }
 }

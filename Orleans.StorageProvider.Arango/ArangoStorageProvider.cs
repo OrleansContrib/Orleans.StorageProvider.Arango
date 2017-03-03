@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ArangoDB.Client;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Orleans.Providers;
 using Orleans.Runtime;
@@ -18,6 +21,9 @@ namespace Orleans.StorageProvider.Arango
 
 
         static Newtonsoft.Json.JsonSerializer jsonSerializerSettings;
+        string collectionName;
+
+        ConcurrentBag<string> initialisedCollections = new ConcurrentBag<string>();
 
         public Task Close()
         {
@@ -35,9 +41,7 @@ namespace Orleans.StorageProvider.Arango
             var username = config.GetProperty("Username", "root");
             var password = config.GetProperty("Password", "password");
             var waitForSync = config.GetBoolProperty("WaitForSync", true);
-            
-            // the arango DB driver assumes that tables are names after the entity types
-            var collectionName = nameof(GrainState);
+            collectionName = config.GetProperty("CollectionName", null);
 
             var grainRefConverter = new GrainReferenceConverter();
 
@@ -51,19 +55,39 @@ namespace Orleans.StorageProvider.Arango
                 s.Serialization.Converters.Add(grainRefConverter);
             });
 
-            jsonSerializerSettings = new Newtonsoft.Json.JsonSerializer();
+            jsonSerializerSettings = new JsonSerializer();
             jsonSerializerSettings.Converters.Add(grainRefConverter);
 
             this.Database = new ArangoDatabase();
+        }
 
-            try
+        async Task<IDocumentCollection> InitialiseCollection(string name)
+        {
+            if (!this.initialisedCollections.Contains(name))
             {
-                await this.Database.CreateCollectionAsync(collectionName);
+                try
+                {
+                    await this.Database.CreateCollectionAsync(name);
+                }
+                catch (Exception ex)
+                {
+                    this.Log.Info($"Arango Storage Provider: Error creating {name} collection, it may already exist");
+                }
+
+                this.initialisedCollections.Add(name);
             }
-            catch (Exception ex)
+
+            return this.Database.Collection(name);
+        }
+
+        Task<IDocumentCollection> GetCollection(string grainType)
+        {
+            if (!string.IsNullOrWhiteSpace(this.collectionName))
             {
-                this.Log.Info($"Arango Storage Provider: Error creating {collectionName} collection, it may already exist");
+                return InitialiseCollection(this.collectionName);
             }
+
+            return InitialiseCollection(grainType.Split('.').Last().ToArangoCollectionName());
         }
 
         public async Task ReadStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
@@ -71,12 +95,10 @@ namespace Orleans.StorageProvider.Arango
             try
             {
                 var primaryKey = grainReference.ToArangoKeyString();
+                var collection = await GetCollection(grainType);
                 
-                var result = await this.Database.DocumentAsync<GrainState>(primaryKey).ConfigureAwait(false);
-                if (null == result)
-                {
-                    return;
-                }
+                var result = await collection.DocumentAsync<GrainState>(primaryKey).ConfigureAwait(false);
+                if (null == result) return;
 
                 if (result.State != null)
                 {
@@ -100,6 +122,7 @@ namespace Orleans.StorageProvider.Arango
             try
             {
                 var primaryKey = grainReference.ToArangoKeyString();
+                var collection = await GetCollection(grainType);
 
                 var document = new GrainState
                 {
@@ -110,12 +133,12 @@ namespace Orleans.StorageProvider.Arango
 
                 if (string.IsNullOrWhiteSpace(grainState.ETag))
                 {
-                    var result = await this.Database.InsertAsync<GrainState>(document).ConfigureAwait(false);
+                    var result = await collection.InsertAsync(document).ConfigureAwait(false);
                     grainState.ETag = result.Rev;
                 }
                 else
                 {
-                    var result = await this.Database.UpdateByIdAsync<GrainState>(primaryKey, document).ConfigureAwait(false);
+                    var result = await collection.UpdateByIdAsync(primaryKey, document).ConfigureAwait(false);
                     grainState.ETag = result.Rev;
                 }
             }
@@ -131,8 +154,9 @@ namespace Orleans.StorageProvider.Arango
             try
             {
                 var primaryKey = grainReference.ToArangoKeyString();
+                var collection = await GetCollection(grainType);
 
-                await this.Database.RemoveByIdAsync<GrainState>(primaryKey).ConfigureAwait(false);
+                await collection.RemoveByIdAsync(primaryKey).ConfigureAwait(false);
 
                 grainState.ETag = null;
             }
