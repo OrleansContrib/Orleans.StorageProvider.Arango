@@ -45,7 +45,7 @@ public class Grain1 : Orleans.Grain<MyGrainState>, IGrain1
 Note:
 
 * Grain state can be stored using a database name of your choice. The default is 'Orleans'.
-* The state is stored in a collection called 'GrainState'.
+* The state is stored in a collection named after your grain. Alternatively, you can supply a table name as an argument.
 
 ## License
 
