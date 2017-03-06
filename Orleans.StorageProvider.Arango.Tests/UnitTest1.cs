@@ -36,7 +36,7 @@ namespace Orleans.StorageProvider.Arango.Tests
         }
 
         [TestMethod]
-        public async Task TestKeys()
+        public void TestKeys()
         {
             var grainRef = GrainReference.FromKeyString(@"GrainReference=000000000000000000000000000000000600000040155719+This£is#a#bad document~key!");
             var key = grainRef.ToArangoKeyString();
