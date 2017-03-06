@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net;
 using Newtonsoft.Json;
+using Orleans;
 using Orleans.Runtime;
 using Orleans.Serialization;
 
@@ -45,7 +47,11 @@ namespace Orleans.StorageProvider.Arango
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(IGrain).IsAssignableFrom(objectType);
+            if (typeof(IGrain).IsAssignableFrom(objectType)) return true;
+            if (objectType == typeof(IPAddress)) return true;
+            if (objectType == typeof(IPEndPoint)) return true;
+
+            return false;
         }
     }
 }
