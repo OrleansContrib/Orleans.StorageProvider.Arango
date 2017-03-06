@@ -6,7 +6,11 @@ Can be used to store grain state in an [ArangoDB](https://www.arangodb.com/) dat
 
 ## Installation
 
-Nugets coming soon...
+Install the [nuget package](https://www.nuget.org/packages/Orleans.StorageProvider.Arango):
+
+```
+PM> Install-Package Orleans.StorageProvider.Arango
+```
 
 ## Usage
 
