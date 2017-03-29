@@ -39,7 +39,7 @@ namespace Orleans.StorageProvider.Arango
             var databaseName = config.GetProperty("DatabaseName", "Orleans");
             var url = config.GetProperty("Url", "http://localhost:8529");
             var username = config.GetProperty("Username", "root");
-            var password = config.GetProperty("Password", "password");
+            var password = config.GetProperty("Password", "");
             var waitForSync = config.GetBoolProperty("WaitForSync", true);
             collectionName = config.GetProperty("CollectionName", null);
 

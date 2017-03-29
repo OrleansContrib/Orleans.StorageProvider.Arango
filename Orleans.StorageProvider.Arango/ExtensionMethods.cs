@@ -17,7 +17,7 @@ namespace Orleans.StorageProvider.Arango
             string databaseName = "Orleans",
             string url = "http://localhost:8529",
             string username = "root",
-            string password = "password",
+            string password = "",
             bool waitForSync = true,
             string collectionName = null)
 
