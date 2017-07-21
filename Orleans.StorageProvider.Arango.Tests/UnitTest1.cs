@@ -35,6 +35,7 @@ namespace Orleans.StorageProvider.Arango.Tests
             await grain.Clear();
         }
 
+        /*
         [TestMethod]
         public void TestKeys()
         {
@@ -42,7 +43,7 @@ namespace Orleans.StorageProvider.Arango.Tests
             var key = grainRef.ToArangoKeyString();
             Assert.AreEqual("GrainReference=000000000000000000000000000000000600000040155719_This_is_a_bad_document_key!", key);
         }
-
+        */
 
         // code to initialize and clean up an Orleans Silo
 

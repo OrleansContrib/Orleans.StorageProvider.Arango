@@ -2,13 +2,14 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ArangoDB.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Orleans.Providers;
 using Orleans.Runtime;
+using Orleans.Serialization;
 using Orleans.Storage;
 
 namespace Orleans.StorageProvider.Arango
@@ -28,10 +29,10 @@ namespace Orleans.StorageProvider.Arango
         public Task Close()
         {
             this.Database.Dispose();
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
 
-        public async Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
+        public Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
             this.Log = providerRuntime.GetLogger(nameof(ArangoStorageProvider));
             this.Name = name;
@@ -43,7 +44,8 @@ namespace Orleans.StorageProvider.Arango
             var waitForSync = config.GetBoolProperty("WaitForSync", true);
             collectionName = config.GetProperty("CollectionName", null);
 
-            var grainRefConverter = new GrainReferenceConverter();
+            var serializationManager = providerRuntime.ServiceProvider.GetRequiredService<SerializationManager>();
+            var grainRefConverter = new GrainReferenceConverter(serializationManager, providerRuntime.GrainFactory);
 
             ArangoDatabase.ChangeSetting(s =>
             {
@@ -59,6 +61,8 @@ namespace Orleans.StorageProvider.Arango
             jsonSerializerSettings.Converters.Add(grainRefConverter);
 
             this.Database = new ArangoDatabase();
+
+            return Task.CompletedTask;
         }
 
         async Task<IDocumentCollection> InitialiseCollection(string name)
@@ -69,7 +73,7 @@ namespace Orleans.StorageProvider.Arango
                 {
                     await this.Database.CreateCollectionAsync(name);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     this.Log.Info($"Arango Storage Provider: Error creating {name} collection, it may already exist");
                 }
