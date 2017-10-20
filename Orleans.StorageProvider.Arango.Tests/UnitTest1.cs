@@ -1,13 +1,8 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
-using Orleans.Runtime.Host;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Orleans.StorageProvider.Arango.TestGrains;
-using System.Diagnostics;
-using System.IO;
-using Orleans.Runtime.Configuration;
-using System.Collections.Generic;
-using Orleans.Runtime;
+using Orleans.TestingHost;
 
 namespace Orleans.StorageProvider.Arango.Tests
 {
@@ -19,7 +14,7 @@ namespace Orleans.StorageProvider.Arango.Tests
         {
 
             // insert your grain test code here
-            var grain = GrainClient.GrainFactory.GetGrain<IGrain1>("1234");
+            var grain = _cluster.GrainFactory.GetGrain<IGrain1>("1234");
             var now = DateTime.UtcNow;
             var guid = Guid.NewGuid();
             await grain.Set("string value", 12344, now, guid, grain);
@@ -47,55 +42,20 @@ namespace Orleans.StorageProvider.Arango.Tests
 
         // code to initialize and clean up an Orleans Silo
 
-        private static SiloHost siloHost;
-        private static AppDomain hostDomain;
-
-        private static void InitSilo(string[] args)
-        {
-            var config = ClusterConfiguration.LocalhostPrimarySilo();
-            config.Globals.RegisterArangoStorageProvider("ARANGO");
-            siloHost = new SiloHost("Primary", config );
-
-            siloHost.InitializeOrleansSilo();
-            var ok = siloHost.StartOrleansSilo();
-            if (!ok) throw new SystemException($"Failed to start Orleans silo '{siloHost.Name}' as a {siloHost.Type} node.");
-        }
+        static TestCluster _cluster;
 
         [ClassInitialize]
-        public static void GrainTestsClassInitialize(TestContext testContext)
+        public static void Setup(TestContext context)
         {
-            hostDomain = AppDomain.CreateDomain("OrleansHost", null, new AppDomainSetup
-            {
-                AppDomainInitializer = InitSilo,
-                ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
-            });
-
-            GrainClient.Initialize(ClientConfiguration.LocalhostSilo());
+            _cluster = new TestCluster();
+            _cluster.ClusterConfiguration.Globals.RegisterArangoStorageProvider("ARANGO");
+            _cluster.Deploy();
         }
 
         [ClassCleanup]
-        public static void GrainTestsClassCleanUp()
+        public static void Cleanup()
         {
-            try
-            {
-                hostDomain.DoCallBack(() =>
-                {
-                    siloHost.Dispose();
-                    siloHost = null;
-                    AppDomain.Unload(hostDomain);
-                });
-            }
-            catch (Exception ex)
-            { }
-
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "taskkill",
-                Arguments = "/F /IM vstest.executionengine.x86.exe",
-                UseShellExecute = false,
-                WindowStyle = ProcessWindowStyle.Hidden,
-            };
-            Process.Start(startInfo);
+            _cluster.StopAllSilos();
         }
     }
 }
